@@ -9,18 +9,22 @@ const _ = require("lodash");
 mongoose.connect(process.env.DATA_BASE);
 const PORT = process.env.PORT || 3000;
 
+// mongoose.set('bufferCommands', false);
+// const connectDB = async () => {
+//   try {
+//     await mongoose.connect(process.env.DATA_BASE);
+//     console.log("MongoDB Connected");
+//   } catch (error) {
+//     console.error("Error connecting to MongoDB:", error);
+//     // Handle the error appropriately, such as sending an error response to the client
+//     // res.status(500).send("Internal Server Error");
+//     process.exit(1); // Consider whether to exit the process or not
+//   }
+// }
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.DATA_BASE);
-    console.log("MongoDB Connected");
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    // Handle the error appropriately, such as sending an error response to the client
-    // res.status(500).send("Internal Server Error");
-    process.exit(1); // Consider whether to exit the process or not
-  }
-}
+
+
+
 
 
 
@@ -65,9 +69,8 @@ app.get("/", function (req, res) {
 
   // const day = date.getDate();
   const day = "Today";
-
-  Items.find().maxTimeMS(15000)
-  .then((e) => {
+  async function run() {
+  await Items.find().then((e) => {
     if (e.length === 0) {
       Items.insertMany(defaultItems);
       res.redirect("/");
@@ -79,9 +82,10 @@ app.get("/", function (req, res) {
     console.error("Error fetching items:", error);
     // Handle the error appropriately, such as sending an error response to the client
     res.status(500).send("Internal Server Error");
-  }).exec();
+  });
 
-
+  }
+  run();
 
 });
 
@@ -136,12 +140,12 @@ app.get("/:customListName", (req, res) => {
 
   let isExit = false;
 
-  List.find().maxTimeMS(15000).then((e) => {
+  List.find().then((e) => {
     e.forEach(element => {
       if (element.name == customListName) {
         isExit = true;
       }
-    }).exec();
+    });
 
     if (!isExit) {
       const list = new List({
@@ -152,10 +156,10 @@ app.get("/:customListName", (req, res) => {
       res.redirect("/" + customListName);
     } else {
 
-      List.find({ name: customListName }).maxTimeMS(15000).then((e) => {
+      List.find({ name: customListName }).then((e) => {
         e.forEach(element => {
           res.render("list", { listTitle: element.name, newListItems: element.listItems });
-        }).exec();
+        });
 
       });
     }
@@ -173,12 +177,8 @@ app.get("/:customListName", (req, res) => {
 //   res.render("about");
 // });
 
-// app.listen(3000, function () {
-//   console.log("Server started on port 3000");
-// });
+app.listen(PORT, function () {
+  console.log("Server started on port 3000");
+});
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-      console.log("listening for requests");
-  })
-})
+

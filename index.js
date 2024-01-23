@@ -15,10 +15,13 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.DATA_BASE);
     console.log("MongoDB Connected");
   } catch (error) {
-    console.log(error);
-    process.exit(1);
+    console.error("Error connecting to MongoDB:", error);
+    // Handle the error appropriately, such as sending an error response to the client
+    // res.status(500).send("Internal Server Error");
+    process.exit(1); // Consider whether to exit the process or not
   }
 }
+
 
 
 
@@ -63,14 +66,19 @@ app.get("/", function (req, res) {
   // const day = date.getDate();
   const day = "Today";
 
-  Items.find().then((e) => {
+  Items.find().maxTimeMS(15000)
+  .then((e) => {
     if (e.length === 0) {
       Items.insertMany(defaultItems);
       res.redirect("/");
     } else {
       res.render("list", { listTitle: day, newListItems: e });
     }
-
+  })
+  .catch((error) => {
+    console.error("Error fetching items:", error);
+    // Handle the error appropriately, such as sending an error response to the client
+    res.status(500).send("Internal Server Error");
   });
 
 
@@ -128,7 +136,7 @@ app.get("/:customListName", (req, res) => {
 
   let isExit = false;
 
-  List.find().then((e) => {
+  List.find().maxTimeMS(15000).then((e) => {
     e.forEach(element => {
       if (element.name == customListName) {
         isExit = true;
@@ -144,7 +152,7 @@ app.get("/:customListName", (req, res) => {
       res.redirect("/" + customListName);
     } else {
 
-      List.find({ name: customListName }).then((e) => {
+      List.find({ name: customListName }).maxTimeMS(15000).then((e) => {
         e.forEach(element => {
           res.render("list", { listTitle: element.name, newListItems: element.listItems });
         });

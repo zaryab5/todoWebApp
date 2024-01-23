@@ -1,11 +1,11 @@
 //jshint esversion:6
-
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-mongoose.connect("mongodb://127.0.0.1:27017/todoDB");
+mongoose.connect(process.env.DATA_BASE);
 
 const itemSchema = new mongoose.Schema({
   value: String

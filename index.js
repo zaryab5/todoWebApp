@@ -79,7 +79,7 @@ app.get("/", function (req, res) {
     console.error("Error fetching items:", error);
     // Handle the error appropriately, such as sending an error response to the client
     res.status(500).send("Internal Server Error");
-  });
+  }).exec();
 
 
 
@@ -141,7 +141,7 @@ app.get("/:customListName", (req, res) => {
       if (element.name == customListName) {
         isExit = true;
       }
-    });
+    }).exec();
 
     if (!isExit) {
       const list = new List({
@@ -155,7 +155,7 @@ app.get("/:customListName", (req, res) => {
       List.find({ name: customListName }).maxTimeMS(15000).then((e) => {
         e.forEach(element => {
           res.render("list", { listTitle: element.name, newListItems: element.listItems });
-        });
+        }).exec();
 
       });
     }

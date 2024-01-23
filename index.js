@@ -3,9 +3,25 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
+const { MongoClient } = require('mongodb');
 const mongoose = require("mongoose");
 const _ = require("lodash");
 mongoose.connect(process.env.DATA_BASE);
+const PORT = process.env.PORT || 3000;
+
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.DATA_BASE);
+    console.log("MongoDB Connected");
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+}
+
+
+
 
 const itemSchema = new mongoose.Schema({
   value: String
@@ -149,6 +165,12 @@ app.get("/:customListName", (req, res) => {
 //   res.render("about");
 // });
 
-app.listen(3000, function () {
-  console.log("Server started on port 3000");
-});
+// app.listen(3000, function () {
+//   console.log("Server started on port 3000");
+// });
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+      console.log("listening for requests");
+  })
+})
